@@ -1,0 +1,41 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "awesome-events/events-loop",
+	"title": "Events Loop",
+	"category": "widgets",
+	"icon": "calendar-alt",
+	"description": "Grid of upcoming events using the same cards as the events archive.",
+	"keywords": [ "events", "upcoming", "loop", "grid" ],
+	"textdomain": "awesome-events",
+	"attributes": {
+		"count": {
+			"type": "number",
+			"default": 6
+		},
+		"heading": {
+			"type": "string",
+			"default": ""
+		},
+		"eventCity": {
+			"type": "string",
+			"default": ""
+		},
+		"eventType": {
+			"type": "string",
+			"default": ""
+		},
+		"showArchiveLink": {
+			"type": "boolean",
+			"default": true
+		},
+		"archiveLinkLabel": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ]
+	}
+}

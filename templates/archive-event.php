@@ -27,6 +27,8 @@ $filters = awesome_events_get_archive_filters();
 
 	<?php awesome_events_get_template( 'event-filters.php' ); ?>
 
+	<?php awesome_events_get_template( 'event-calendar.php' ); ?>
+
 	<?php if ( have_posts() ) : ?>
 		<?php
 		global $wp_query;

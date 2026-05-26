@@ -212,6 +212,11 @@ function awesome_events_archive_url( $overrides = array() ) {
 		$args['event_type'] = $filters['event_type'];
 	}
 
+	$cal = awesome_events_get_calendar_month();
+	if ( ! empty( $cal['key'] ) ) {
+		$args['cal_month'] = $cal['key'];
+	}
+
 	foreach ( $overrides as $key => $value ) {
 		if ( null === $value ) {
 			unset( $args[ $key ] );
@@ -221,6 +226,181 @@ function awesome_events_archive_url( $overrides = array() ) {
 	}
 
 	return $args ? add_query_arg( $args, $base ) : $base;
+}
+
+/**
+ * Active calendar month from ?cal_month=YYYY-MM (defaults to current month).
+ *
+ * @return array{year: int, month: int, key: string}
+ */
+function awesome_events_get_calendar_month() {
+	$raw = '';
+	if ( isset( $_GET['cal_month'] ) ) {
+		$raw = sanitize_text_field( wp_unslash( $_GET['cal_month'] ) );
+	}
+
+	if ( preg_match( '/^(\d{4})-(\d{2})$/', $raw, $m ) ) {
+		$year  = (int) $m[1];
+		$month = (int) $m[2];
+		if ( $month >= 1 && $month <= 12 ) {
+			return array(
+				'year'  => $year,
+				'month' => $month,
+				'key'   => sprintf( '%04d-%02d', $year, $month ),
+			);
+		}
+	}
+
+	return array(
+		'year'  => (int) wp_date( 'Y' ),
+		'month' => (int) wp_date( 'n' ),
+		'key'   => wp_date( 'Y-m' ),
+	);
+}
+
+/**
+ * Events in a month grouped by day (Y-m-d), respecting city/type filters.
+ *
+ * @param int $year  Four-digit year.
+ * @param int $month Month 1–12.
+ * @return array<string, array<int, array{id: int, title: string, url: string}>>
+ */
+function awesome_events_get_calendar_events_by_day( $year, $month ) {
+	$month_start = sprintf( '%04d-%02d-01', $year, $month );
+	$month_end   = wp_date( 'Y-m-t', strtotime( $month_start . ' 12:00:00' ) );
+
+	$filters   = awesome_events_get_archive_filters();
+	$tax_query = array();
+
+	if ( $filters['event_city'] ) {
+		$tax_query[] = array(
+			'taxonomy' => 'event_city',
+			'field'    => 'slug',
+			'terms'    => $filters['event_city'],
+		);
+	}
+	if ( $filters['event_type'] ) {
+		$tax_query[] = array(
+			'taxonomy' => 'event_type',
+			'field'    => 'slug',
+			'terms'    => $filters['event_type'],
+		);
+	}
+
+	$query_args = array(
+		'post_type'              => 'event',
+		'post_status'            => 'publish',
+		'posts_per_page'         => -1,
+		'orderby'                => 'meta_value',
+		'meta_key'               => '_event_start_date',
+		'order'                  => 'ASC',
+		'no_found_rows'          => true,
+		'update_post_meta_cache' => true,
+		'meta_query'             => array(
+			array(
+				'key'     => '_event_start_date',
+				'value'   => $month_end,
+				'compare' => '<=',
+				'type'    => 'DATE',
+			),
+		),
+	);
+
+	if ( $tax_query ) {
+		$query_args['tax_query'] = $tax_query;
+	}
+
+	$posts = get_posts( $query_args );
+	$days  = array();
+	$tz    = wp_timezone();
+
+	foreach ( $posts as $post ) {
+		$meta  = awesome_events_get_meta( $post->ID );
+		$start = $meta['start_date'];
+		if ( '' === $start ) {
+			continue;
+		}
+
+		$end = $meta['end_date'] ? $meta['end_date'] : $start;
+		$from = max( $start, $month_start );
+		$to   = min( $end, $month_end );
+
+		if ( $from > $to ) {
+			continue;
+		}
+
+		$cursor = new DateTimeImmutable( $from, $tz );
+		$last   = new DateTimeImmutable( $to, $tz );
+
+		while ( $cursor <= $last ) {
+			$key = $cursor->format( 'Y-m-d' );
+			if ( ! isset( $days[ $key ] ) ) {
+				$days[ $key ] = array();
+			}
+
+			$exists = false;
+			foreach ( $days[ $key ] as $item ) {
+				if ( $item['id'] === $post->ID ) {
+					$exists = true;
+					break;
+				}
+			}
+
+			if ( ! $exists ) {
+				$days[ $key ][] = array(
+					'id'    => $post->ID,
+					'title' => get_the_title( $post ),
+					'url'   => get_permalink( $post ),
+				);
+			}
+
+			$cursor = $cursor->modify( '+1 day' );
+		}
+	}
+
+	return $days;
+}
+
+/**
+ * Calendar grid cells (null = padding, string = Y-m-d).
+ *
+ * @param int $year  Year.
+ * @param int $month Month.
+ * @return array<int, string|null>
+ */
+function awesome_events_get_calendar_grid( $year, $month ) {
+	$month_start   = sprintf( '%04d-%02d-01', $year, $month );
+	$first         = new DateTimeImmutable( $month_start, wp_timezone() );
+	$days_in_month = (int) $first->format( 't' );
+	$start_wday    = (int) $first->format( 'w' );
+	$week_start    = (int) get_option( 'start_of_week', 0 );
+	$offset        = ( $start_wday - $week_start + 7 ) % 7;
+
+	$cells = array_fill( 0, $offset, null );
+
+	for ( $day = 1; $day <= $days_in_month; $day++ ) {
+		$cells[] = sprintf( '%04d-%02d-%02d', $year, $month, $day );
+	}
+
+	return $cells;
+}
+
+/**
+ * Localized weekday abbreviations for calendar header.
+ *
+ * @return string[]
+ */
+function awesome_events_get_calendar_weekdays() {
+	$week_start = (int) get_option( 'start_of_week', 0 );
+	$labels     = array();
+
+	for ( $i = 0; $i < 7; $i++ ) {
+		$wday           = ( $week_start + $i ) % 7;
+		$timestamp      = strtotime( "Sunday +{$wday} days" );
+		$labels[ $i ] = wp_date( 'D', $timestamp );
+	}
+
+	return $labels;
 }
 
 /**

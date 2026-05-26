@@ -81,6 +81,147 @@
 	cursor: pointer;
 }
 
+/* --- Archive calendar --- */
+
+.awesome-events-calendar {
+	margin-bottom: var(--ae-gap-lg);
+	border: var(--ae-border);
+	border-radius: var(--ae-radius);
+	background: #fff;
+	overflow: hidden;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.awesome-events-calendar__nav {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--ae-gap);
+	padding: 0.75rem 1rem;
+	background: var(--ae-surface);
+	border-bottom: var(--ae-border);
+}
+
+.awesome-events-calendar__title {
+	margin: 0;
+	flex: 1;
+	text-align: center;
+}
+
+.awesome-events-calendar__nav-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35em;
+	padding: 0.35em 0.5em;
+	text-decoration: none;
+	color: inherit;
+	border-radius: var(--ae-radius);
+	white-space: nowrap;
+}
+
+.awesome-events-calendar__nav-btn:hover,
+.awesome-events-calendar__nav-btn:focus {
+	color: var(--ae-accent);
+}
+
+.awesome-events-calendar__weekdays {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	border-bottom: var(--ae-border);
+	background: var(--ae-surface);
+	width: 100%;
+}
+
+.awesome-events-calendar__weekday {
+	padding: 0.4em 0.25em;
+	text-align: center;
+	color: var(--ae-text-muted);
+	box-sizing: border-box;
+	min-width: 0;
+}
+
+.awesome-events-calendar__grid {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	width: 100%;
+	gap: 1px;
+	background: rgba(0, 0, 0, 0.12);
+}
+
+.awesome-events-calendar__cell {
+	min-height: 4.5rem;
+	padding: 5px;
+	box-sizing: border-box;
+	min-width: 0;
+	overflow: hidden;
+	background: #fff;
+	vertical-align: top;
+}
+
+.awesome-events-calendar__cell--pad {
+	background: var(--ae-surface);
+	min-height: 2.5rem;
+}
+
+.awesome-events-calendar__cell.is-today {
+	background: rgba(26, 95, 74, 0.06);
+	box-shadow: inset 0 0 0 1px var(--ae-accent);
+}
+
+.awesome-events-calendar__day-num {
+	display: block;
+	margin-bottom: 0.2em;
+	color: var(--ae-text-muted);
+	line-height: 1;
+}
+
+.awesome-events-calendar__cell.is-today .awesome-events-calendar__day-num {
+	color: var(--ae-accent);
+	font-weight: 600;
+}
+
+.awesome-events-calendar__events {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.awesome-events-calendar__events li {
+	margin: 0 0 0.2em;
+	line-height: 1.25;
+}
+
+.awesome-events-calendar__events a {
+	display: block;
+	text-decoration: none;
+	color: var(--ae-accent);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.awesome-events-calendar__events a:hover,
+.awesome-events-calendar__events a:focus {
+	text-decoration: underline;
+}
+
+@media (max-width: 40rem) {
+	.awesome-events-calendar__nav-btn span[aria-hidden="true"] {
+		display: none;
+	}
+
+	.awesome-events-calendar__cell {
+		min-height: 3.25rem;
+		padding: 4px;
+	}
+
+	.awesome-events-calendar__weekday {
+		padding: 0.3em 0.1em;
+	}
+}
+
 /* --- Archive header & months --- */
 
 .awesome-events-archive__title {
@@ -121,6 +262,44 @@
 	.awesome-events-grid {
 		grid-template-columns: repeat(2, 1fr);
 	}
+}
+
+/* --- Events Loop block --- */
+
+.awesome-events-loop__heading {
+	margin: 0 0 var(--ae-gap-lg);
+}
+
+.awesome-events-loop__more {
+	margin: var(--ae-gap-lg) 0 0;
+	text-align: center;
+}
+
+.awesome-events-loop__more-link {
+	display: inline-block;
+	padding: 0.5em 1.25em;
+	border: var(--ae-border);
+	border-radius: var(--ae-radius);
+	text-decoration: none;
+	color: inherit;
+	background: #fff;
+}
+
+.awesome-events-loop__more-link:hover,
+.awesome-events-loop__more-link:focus {
+	border-color: var(--ae-accent);
+	color: var(--ae-accent);
+}
+
+.awesome-events-loop-editor {
+	padding: 1rem 1.25rem;
+	border: 1px dashed rgba(0, 0, 0, 0.2);
+	border-radius: var(--ae-radius);
+	background: var(--ae-surface);
+}
+
+.awesome-events-loop-editor__label {
+	margin: 0;
 }
 
 /* --- Event card --- */

@@ -17,6 +17,7 @@ define( 'AWESOME_EVENTS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'AWESOME_EVENTS_URL', plugin_dir_url( __FILE__ ) );
 
 require_once AWESOME_EVENTS_PATH . 'includes/template-functions.php';
+require_once AWESOME_EVENTS_PATH . 'includes/blocks.php';
 
 /**
  * Bootstrap hooks.
@@ -27,6 +28,18 @@ function awesome_events_init() {
 	awesome_events_register_meta();
 }
 add_action( 'init', 'awesome_events_init' );
+
+/**
+ * Query vars for archive calendar month (Y-m).
+ *
+ * @param array<string> $vars Public query vars.
+ * @return array<string>
+ */
+function awesome_events_query_vars( $vars ) {
+	$vars[] = 'cal_month';
+	return $vars;
+}
+add_filter( 'query_vars', 'awesome_events_query_vars' );
 
 /**
  * Register the event CPT.
@@ -439,15 +452,6 @@ function awesome_events_default_terms() {
 			'Other'          => 'other',
 		),
 		'event_city' => array(
-			'Genoa'                      => 'genoa',
-			'Cinque Terre'               => 'cinque-terre',
-			'Portofino'                  => 'portofino',
-			'Sanremo'                    => 'sanremo',
-			'La Spezia'                  => 'la-spezia',
-			'Savona'                     => 'savona',
-			'Imperia'                    => 'imperia',
-			'Rapallo'                    => 'rapallo',
-			'Santa Margherita Ligure'    => 'santa-margherita-ligure',
 			'Other'                      => 'other',
 		),
 	);

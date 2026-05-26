@@ -55,6 +55,13 @@ $types  = awesome_events_get_filter_terms( 'event_type', $filters['event_type'] 
 		<input type="hidden" name="past" value="1">
 	<?php endif; ?>
 
+	<?php
+	$cal_month = awesome_events_get_calendar_month();
+	if ( ! empty( $cal_month['key'] ) ) :
+		?>
+		<input type="hidden" name="cal_month" value="<?php echo esc_attr( $cal_month['key'] ); ?>">
+	<?php endif; ?>
+
 	<div class="awesome-events-filters__field">
 		<label for="awesome-events-filter-city"><?php esc_html_e( 'City', 'awesome-events' ); ?></label>
 		<select name="event_city" id="awesome-events-filter-city">
