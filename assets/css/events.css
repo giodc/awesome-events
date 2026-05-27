@@ -266,6 +266,10 @@
 
 /* --- Events Loop block --- */
 
+.awesome-events.awesome-events-loop.wp-block-awesome-events-events-loop {
+    padding: 1rem 0;
+}
+
 .awesome-events-loop__heading {
 	margin: 0 0 var(--ae-gap-lg);
 }
